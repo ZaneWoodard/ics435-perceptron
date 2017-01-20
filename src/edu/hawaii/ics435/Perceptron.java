@@ -1,6 +1,10 @@
 package edu.hawaii.ics435;
 
 import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Perceptron {
 
@@ -9,7 +13,23 @@ public class Perceptron {
     private Byte[] labels;
     private Double[] weights;
 
+    private static final Logger logger = Logger.getLogger("Perceptron");
+    private static final Level LOGGING_LEVEL = Level.FINER;
+
+    /**
+     * This is some magic to get the logger to actually log properly
+     */
+    {
+        logger.setLevel(LOGGING_LEVEL);
+        logger.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setLevel(LOGGING_LEVEL);
+        logger.addHandler(handler);
+
+    }
+
     public Perceptron(Byte[][] inputs, Byte[] labels) {
+
         this.inputs = inputs;
         this.labels = labels;
         this.weights = new Double[inputs[0].length];
@@ -17,21 +37,33 @@ public class Perceptron {
     }
 
     protected void learn() {
-        //TODO Currently not looping until no mismatches found
-        for(int j = 0; j < inputs.length; j++) {
-            Byte[] input = inputs[j];
-            Byte output = classify(input);
-            Byte desiredOutput = labels[j];
-            System.out.println("Output for " + Arrays.toString(input) + ": " + output.byteValue() + "(" + desiredOutput.byteValue() + ")");
-            if(output!=desiredOutput) {
-                //Misclassification, update the weights
-                Byte difference = (byte)(desiredOutput - output);
-                for(int i = 0; i < input.length; i++) {
-                    weights[i] = weights[i] + difference*input[i];
+        int mismatches = 0;
+        int round = 0;
+        logger.info("Starting training with input data...");
+        do {
+            mismatches = 0;
+            for (int j = 0; j < inputs.length; j++) {
+                logger.finer("Processing input " + j);
+                Byte[] input = inputs[j];
+                Byte output = classify(input);
+                Byte desiredOutput = labels[j];
+                if (output != desiredOutput) {
+                    mismatches++;
+                    //Misclassification, update the weights
+                    Byte difference = (byte) (desiredOutput - output);
+                    logger.finer("Old weights: " + Arrays.toString(weights));
+                    for (int i = 0; i < input.length; i++) {
+                        weights[i] = weights[i] + difference * input[i];
+                    }
+                    logger.finer("New weights: " + Arrays.toString(weights));
                 }
-                System.out.println("New weights: " + Arrays.toString(weights));
             }
-        }
+
+            logger.fine("Round " + round++ + " completed with " + mismatches + " mismatches");
+
+        } while(mismatches>0);
+
+        logger.info("Done training");
     }
 
     protected Byte classify(Byte[] input) {
