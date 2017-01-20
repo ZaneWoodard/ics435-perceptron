@@ -74,6 +74,7 @@ public class Perceptron {
         }
 
         //TODO I'm assuming we have to round here. Not sure if this is true.
+        //TODO I think a threshold value is supposed to be used somewhere around here
         return (byte) Math.round(Math.sin(summation));
     }
 }
