@@ -30,10 +30,16 @@ public class Perceptron {
 
     public Perceptron(Byte[][] inputs, Byte[] labels) {
 
-        this.inputs = inputs;
         this.labels = labels;
-        this.weights = new Double[inputs[0].length];
+
+        //Need +1 for weights & input lengths in order to add a bias field
+        this.weights = new Double[inputs[0].length+1];
         Arrays.fill(weights, 0.0);
+        this.inputs = new Byte[inputs.length][inputs[0].length+1];
+        for(int i = 0; i < inputs.length; i++) {
+            System.arraycopy(inputs[i], 0, this.inputs[i], 1, inputs[i].length);
+            this.inputs[i][0] = 1; //Set the bias
+        }
     }
 
     protected void learn() {
