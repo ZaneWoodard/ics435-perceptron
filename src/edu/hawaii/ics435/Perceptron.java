@@ -60,7 +60,7 @@ public class Perceptron {
             for (int j = 0; j < inputs.length; j++) {
                 logger.finer("Processing input " + j);
                 Byte[] input = inputs[j];
-                Byte output = classify(input);
+                Byte output = biasedClassify(input);
                 Byte desiredOutput = labels[j];
                 if (output != desiredOutput) {
                     mismatches++;
@@ -83,14 +83,15 @@ public class Perceptron {
             logger.info("Attempted " + round + " rounds of learning; convergence highly unlikely. Ending Learning phase.");
         }
 
-        logger.info("Done training");
+        logger.info("Convergence on training data reached in " + round + " epochs");
     }
 
-    protected Byte classify(Byte[] input) {
+
+    private Byte biasedClassify(Byte[] biasedInput) {
         Double summation = 0.0;
 
-        for(int i = 0; i < input.length; i++) {
-            summation += input[i]*weights[i];
+        for(int i = 0; i < biasedInput.length; i++) {
+            summation += biasedInput[i]*weights[i];
         }
 
         //TODO I'm assuming we have to round here. Not sure if this is true.
@@ -99,5 +100,17 @@ public class Perceptron {
          * TODO It's probably due to using the wrong function (Math.sin)
          */
         return (byte) Math.round(Math.sin(summation));
+    }
+
+    protected Byte classify(Byte[] input) {
+        input = addBiasToInput(input);
+        return biasedClassify(input);
+    }
+
+    private Byte[] addBiasToInput(Byte[] input) {
+        Byte[] biasedInput = new Byte[input.length+1];
+        System.arraycopy(input, 0, biasedInput, 1, input.length);
+        biasedInput[0] = 1;
+        return biasedInput;
     }
 }
