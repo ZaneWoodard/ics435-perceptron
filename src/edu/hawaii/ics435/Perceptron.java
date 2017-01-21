@@ -13,6 +13,15 @@ public class Perceptron {
     private Byte[] labels;
     private Double[] weights;
 
+    /**
+     * The learning rate constant, can be used to scale how much the weights are adjusted by
+     */
+    private static Byte LEARNING_RATE = 1;
+
+    /**
+     * Sets the upper limit to how many learning rounds the perceptron algorithm will attempt before quitting
+     */
+    private static final int CONVERGENCE_ROUND_LIMIT = 1000;
     private static final Logger logger = Logger.getLogger("Perceptron");
     private static final Level LOGGING_LEVEL = Level.FINER;
 
@@ -57,6 +66,7 @@ public class Perceptron {
                     mismatches++;
                     //Misclassification, update the weights
                     Byte difference = (byte) (desiredOutput - output);
+                    Byte delta = (byte) (difference*LEARNING_RATE);
                     logger.finer("Old weights: " + Arrays.toString(weights));
                     for (int i = 0; i < input.length; i++) {
                         weights[i] = weights[i] + difference * input[i];
@@ -67,7 +77,11 @@ public class Perceptron {
 
             logger.fine("Round " + round++ + " completed with " + mismatches + " mismatches");
 
-        } while(mismatches>0);
+        } while(mismatches>0 && CONVERGENCE_ROUND_LIMIT > round);
+
+        if(round >= CONVERGENCE_ROUND_LIMIT) {
+            logger.info("Attempted " + round + " rounds of learning; convergence highly unlikely. Ending Learning phase.");
+        }
 
         logger.info("Done training");
     }
@@ -81,6 +95,9 @@ public class Perceptron {
 
         //TODO I'm assuming we have to round here. Not sure if this is true.
         //TODO I think a threshold value is supposed to be used somewhere around here
+        /* TODO Classification currently outputs 0, when it should be either -1 or 1. Need to figure out a fix.
+         * TODO It's probably due to using the wrong function (Math.sin)
+         */
         return (byte) Math.round(Math.sin(summation));
     }
 }
