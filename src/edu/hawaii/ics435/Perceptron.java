@@ -89,6 +89,9 @@ public class Perceptron {
 
         //TODO I'm assuming we have to round here. Not sure if this is true.
         //TODO I think a threshold value is supposed to be used somewhere around here
+        /* TODO Classification currently outputs 0, when it should be either -1 or 1. Need to figure out a fix.
+         * TODO It's probably due to using the wrong function (Math.sin)
+         */
         return (byte) Math.round(Math.sin(summation));
     }
 }
