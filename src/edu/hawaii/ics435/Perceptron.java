@@ -13,6 +13,7 @@ public class Perceptron {
     private Byte[] labels;
     private Double[] weights;
 
+    private static final Byte LEARNING_RATE = 1;
     private static final Logger logger = Logger.getLogger("Perceptron");
     private static final Level LOGGING_LEVEL = Level.FINER;
 
@@ -51,6 +52,7 @@ public class Perceptron {
                     mismatches++;
                     //Misclassification, update the weights
                     Byte difference = (byte) (desiredOutput - output);
+                    Byte delta = difference*LEARNING_RATE;
                     logger.finer("Old weights: " + Arrays.toString(weights));
                     for (int i = 0; i < input.length; i++) {
                         weights[i] = weights[i] + difference * input[i];
