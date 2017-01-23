@@ -2,7 +2,6 @@ package edu.hawaii.ics435;
 
 import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +27,7 @@ public class Perceptron {
     /**
      * This is some magic to get the logger to actually log properly
      */
-    {
+    static {
         logger.setLevel(LOGGING_LEVEL);
         logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
@@ -94,12 +93,7 @@ public class Perceptron {
             summation += biasedInput[i]*weights[i];
         }
 
-        //TODO I'm assuming we have to round here. Not sure if this is true.
-        //TODO I think a threshold value is supposed to be used somewhere around here
-        /* TODO Classification currently outputs 0, when it should be either -1 or 1. Need to figure out a fix.
-         * TODO It's probably due to using the wrong function (Math.sin)
-         */
-        return (byte) Math.round(Math.sin(summation));
+        return (summation > 0) ? (byte)1 : (byte)-1;
     }
 
     protected Byte classify(Byte[] input) {
