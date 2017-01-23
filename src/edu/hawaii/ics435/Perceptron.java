@@ -121,6 +121,10 @@ public class Perceptron {
         return biasedClassify(input);
     }
 
+    protected Byte classifyPoint(Point p) {
+        Integer[] input = new Integer[]{1, p.x, p.y};
+        return biasedClassify(input);
+    }
     private Integer[] addBiasToInput(Integer[] input) {
         Integer[] biasedInput = new Integer[input.length+1];
         System.arraycopy(input, 0, biasedInput, 1, input.length);

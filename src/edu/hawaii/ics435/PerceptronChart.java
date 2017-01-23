@@ -37,6 +37,9 @@ public class PerceptronChart extends JFrame {
         XYSeriesCollection result = new XYSeriesCollection();
         XYSeries red = new XYSeries("-1");
         XYSeries blue = new XYSeries("1");
+        XYSeries learnedRed = new XYSeries("Learned -1");
+        XYSeries learnedBlue = new XYSeries("Learned 1");
+
         for(int i = 0; i < points.length; i++) {
             Byte label = labels[i];
             Point p = points[i];
@@ -50,6 +53,9 @@ public class PerceptronChart extends JFrame {
         }
         result.addSeries(red);
         result.addSeries(blue);
+        result.addSeries(learnedRed);
+        result.addSeries(learnedBlue);
+
         return result;
     }
 
@@ -59,17 +65,33 @@ public class PerceptronChart extends JFrame {
         if(label==-1) {
             result.getSeries("-1").add(p.x, p.y);
         } else if(label==1) {
-            result.getSeries("-1").add(p.x, p.y);
+            result.getSeries("1").add(p.x, p.y);
         } else {
             throw new InputMismatchException("Unrecognized label: " + label);
         }
         this.chart.getXYPlot().setDataset(result);
     }
 
+    protected void addLearnedPoint(Point p, Byte label) {
+
+        XYSeriesCollection result = (XYSeriesCollection) chart.getXYPlot().getDataset();
+        if(label==-1) {
+            result.getSeries("Learned -1").add(p.x, p.y);
+        } else if(label==1) {
+            result.getSeries("Learned 1").add(p.x, p.y);
+        } else {
+            throw new InputMismatchException("Unrecognized label: " + label);
+        }
+        this.chart.getXYPlot().setDataset(result);
+
+        try {
+            Thread.sleep(Main.WAIT_MS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected void addLine(Point2D.Double p1, Point2D.Double p2, String name) {
-//        Integer index = lineIndexes.get(name);
-//        index = index==null ? ++maxLineIndex : index;
-//        lineIndexes.put(name, index);
 
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
 
@@ -91,10 +113,13 @@ public class PerceptronChart extends JFrame {
             lineDataSet.addSeries(series);
         }
 
-//        XYSeriesCollection lineDataSet = new XYSeriesCollection();
-//        XYSeries series = new XYSeries(name);
 
         this.chart.getXYPlot().setRenderer(1, lineRenderer);
         this.chart.getXYPlot().setDataset(1, lineDataSet);
+        try {
+            Thread.sleep(Main.WAIT_MS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -29,6 +29,9 @@ public class PerceptronDataSet {
 
         this.maxX = maxX;
         this.maxY = maxY;
+
+        addedPoints = new ArrayList<>();
+        addedLabels = new ArrayList<>();
     }
 
 }

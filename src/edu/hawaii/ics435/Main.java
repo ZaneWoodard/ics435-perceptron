@@ -7,7 +7,8 @@ import java.util.Random;
 
 public class Main {
 
-    private static final Integer MAX_X = 100, MAX_Y = 100, MAX_POINTS = 50, MAX_SLOPE = 4, MAX_B = 10;
+    private static final Integer MAX_X = 100, MAX_Y = 100, MAX_POINTS = 50, MAX_SLOPE = 4, MAX_B = 40;
+    protected static final long WAIT_MS = 100;
     private static PerceptronDataSet pds;
     private static PerceptronChart chart;
 
@@ -22,6 +23,16 @@ public class Main {
 
         Perceptron perceptron = new Perceptron(pds.initialPoints, pds.initialLabels);
         perceptron.learn();
+
+        Random rand = new Random();
+        for(int i = 0; i < 30; i++) {
+            Point p = new Point((int) (MAX_X*rand.nextDouble()), (int) (MAX_Y*rand.nextDouble()));
+            Byte label = perceptron.classifyPoint(p);
+
+            pds.addedPoints.add(p);
+            pds.addedLabels.add(label);
+            chart.addLearnedPoint(p, label);
+        }
 
     }
 
