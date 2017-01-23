@@ -1,119 +1,43 @@
 package edu.hawaii.ics435;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.Random;
 
 public class Main {
 
+    private static final Integer MAX_X = 100, MAX_Y = 100, MAX_POINTS = 50, MAX_SLOPE = 4, MAX_B = 10;
+    private static PerceptronDataSet pds;
+    private static PerceptronChart chart;
+
     public static void main(String[] args) {
         System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS] [%4$s] [%3$s] %5$s%6$s%n");
 
-        noConvergence();
-        largeExample();
-//        smallExample();
+        pds = generateLinearlySeparableData(MAX_POINTS, MAX_X, MAX_Y, MAX_SLOPE, MAX_B);
+        chart = new PerceptronChart("Perceptron Chart", pds);
+        chart.addLine(pds.realLineP1, pds.realLineP2, "True Line");
+        chart.pack();
+        chart.setVisible(true);
 
-//        Point[] points = new Point[4];
-//        points[0] = new Point(1, 2);
-//        points[1] = new Point(2, 3);
-//        points[2] = new Point(3, 4);
-//        points[3] = new Point(4, 5);
-
-
-//        PerceptronDataSet pds = generateLinearlySeparableData(30, 10, 10, 8, 3);
-//        PerceptronChart pchart = new PerceptronChart("Test", pds.initialPoints, pds.initialLabels);
-//        pchart.pack();
-//        pchart.setVisible(true);
-//        pchart.addLine(pds.realLineP1, pds.realLineP2, "True Line");
-//        pchart.addPoint(new Point(2, 2), (byte)-1);
+        Perceptron perceptron = new Perceptron(pds.initialPoints, pds.initialLabels);
+        perceptron.learn();
 
     }
 
+    public static void addLearnedLine(Point2D.Double p1, Point2D.Double p2, Integer round) {
+        pds.learnedLineP1 = p1;
+        pds.learnedLineP2 = p2;
 
-    private static void smallExample() {
-        Byte[][] trainingInput = new Byte[][] {
-                {
-                    1,1,
-                    0,0
-                }, {
-                    0,1,
-                    0,0
-                }, {
-                    1,0,
-                    0,0
-                }, {
-                    0,0,
-                    0,0
-                }, {
-                    0,0,
-                    1,0
-                }
-        };
-        Byte[] labels = new Byte[]{1, 1, 1, 0, 0};
-        Perceptron perceptron = new Perceptron(trainingInput, labels);
-        perceptron.learn();
+        //Extend the points to the maxX/Y of the chart
+        double m = (p1.y - p2.y) / (p1.x - p2.x);
+        double intercept = p1.y;
+
+        p2.x = pds.maxX;
+        p2.y = m*pds.maxX + intercept;
 
 
-        System.out.println(perceptron.classify(trainingInput[0]));
-        System.out.println(perceptron.classify(trainingInput[1]));
-        System.out.println(perceptron.classify(trainingInput[2]));
-        System.out.println(perceptron.classify(trainingInput[3]));
-
-        System.out.println(perceptron.classify(new Byte[]{
-                0,0,
-                1,1
-        }));
-    }
-
-    private static void largeExample() {
-        Byte[][] trainingInput = new Byte[][] {
-                {
-                    0,0,0,0,
-                    0,1,1,0,
-                    0,1,1,0,
-                    0,0,0,0,
-                }, {
-                    1,1,1,1,
-                    1,0,0,1,
-                    1,0,0,1,
-                    1,1,1,1,
-                }
-        };
-        Byte[] labels = new Byte[]{1, -1};
-        Perceptron perceptron = new Perceptron(trainingInput, labels);
-        perceptron.learn();
-
-
-        System.out.println(perceptron.classify(trainingInput[0]));
-        System.out.println(perceptron.classify(trainingInput[1]));
-        System.out.println(perceptron.classify(new Byte[]{
-                0, 0, 0, 0,
-                1, 0, 1, 0,
-                1, 1, 1, 0,
-                1, 1, 0, 0,
-                }));
-    }
-
-    /**
-     * This is an example case where the data and labels follow a XOR pattern
-     * It should be impossible for convergence to occur
-     */
-    private static void noConvergence() {
-        Byte[][] trainingInput = new Byte[][] {
-                {0, 0},
-                {0, 1},
-                {1, 0},
-                {1, 1}
-        };
-        Byte[] labels = new Byte[]{0,1,1,0};
-
-        Perceptron perceptron = new Perceptron(trainingInput, labels);
-        perceptron.learn();
-        System.out.println(perceptron.classify(trainingInput[0]));
-        System.out.println(perceptron.classify(trainingInput[1]));
-        System.out.println(perceptron.classify(trainingInput[2]));
-        System.out.println(perceptron.classify(trainingInput[3]));
+        chart.addLine(p1, p2, "Learned Line");
     }
 
     private static PerceptronDataSet generateLinearlySeparableData(int numPoints, int maxX, int maxY, int maxSlope, int maxB) {
@@ -139,9 +63,9 @@ public class Main {
             }
         }
 
-        Point realLineP1 = new Point(0, (int)b);
-        Point reallineP2 = new Point(maxX, (int) (m*maxX+b));
-        PerceptronDataSet pds = new PerceptronDataSet(points, labels, realLineP1, reallineP2);
+        Point2D.Double realLineP1 = new Point2D.Double(0, b);
+        Point2D.Double reallineP2 = new Point2D.Double(maxX, m*maxX+b);
+        PerceptronDataSet pds = new PerceptronDataSet(points, labels, realLineP1, reallineP2, MAX_X, MAX_Y);
 
         return pds;
     }

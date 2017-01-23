@@ -1,5 +1,7 @@
 package edu.hawaii.ics435;
 
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -7,15 +9,15 @@ import java.util.logging.Logger;
 
 public class Perceptron {
 
+    private Integer[][] inputs;
     //Using Byte because it's the smallest data type in Java that is still treated as a numeric type
-    private Byte[][] inputs;
     private Byte[] labels;
     private Double[] weights;
 
     /**
      * The learning rate constant, can be used to scale how much the weights are adjusted by
      */
-    private static Byte LEARNING_RATE = 1;
+    private static double LEARNING_RATE = 1;
 
     /**
      * Sets the upper limit to how many learning rounds the perceptron algorithm will attempt before quitting
@@ -36,17 +38,29 @@ public class Perceptron {
 
     }
 
-    public Perceptron(Byte[][] inputs, Byte[] labels) {
+    public Perceptron(Integer[][] inputs, Byte[] labels) {
 
         this.labels = labels;
 
         //Need +1 for weights & input lengths in order to add a bias field
         this.weights = new Double[inputs[0].length+1];
         Arrays.fill(weights, 0.0);
-        this.inputs = new Byte[inputs.length][inputs[0].length+1];
+        this.inputs = new Integer[inputs.length][inputs[0].length+1];
         for(int i = 0; i < inputs.length; i++) {
-            System.arraycopy(inputs[i], 0, this.inputs[i], 1, inputs[i].length);
-            this.inputs[i][0] = 1; //Set the bias
+            this.inputs[i] = addBiasToInput(inputs[i]);
+        }
+    }
+
+    public Perceptron(Point[] points, Byte[] labels) {
+        this.inputs = new Integer[points.length][3];
+        this.labels = labels;
+        this.weights = new Double[3];
+        Arrays.fill(this.weights, 0.0);
+        for(int i = 0; i < points.length; i++) {
+            Point p = points[i];
+            this.inputs[i][0] = 1;
+            this.inputs[i][1] = p.x;
+            this.inputs[i][2] = p.y;
         }
     }
 
@@ -58,7 +72,7 @@ public class Perceptron {
             mismatches = 0;
             for (int j = 0; j < inputs.length; j++) {
                 logger.finer("Processing input " + j);
-                Byte[] input = inputs[j];
+                Integer[] input = inputs[j];
                 Byte output = biasedClassify(input);
                 Byte desiredOutput = labels[j];
                 if (output != desiredOutput) {
@@ -68,10 +82,16 @@ public class Perceptron {
                     Byte delta = (byte) (difference*LEARNING_RATE);
                     logger.finer("Old weights: " + Arrays.toString(weights));
                     for (int i = 0; i < input.length; i++) {
-                        weights[i] = weights[i] + difference * input[i];
+                        weights[i] = weights[i] + delta * input[i];
                     }
                     logger.finer("New weights: " + Arrays.toString(weights));
                 }
+            }
+
+            if(mismatches>=0) {
+                Point2D.Double decisionBoundaryP1 = new Point2D.Double(0, -weights[0] / weights[2]);
+                Point2D.Double decisionBoundaryP2 = new Point2D.Double(-weights[0] / weights[1], 0);
+                Main.addLearnedLine(decisionBoundaryP1, decisionBoundaryP2, round);
             }
 
             logger.fine("Round " + round++ + " completed with " + mismatches + " mismatches");
@@ -86,23 +106,23 @@ public class Perceptron {
     }
 
 
-    private Byte biasedClassify(Byte[] biasedInput) {
+    private Byte biasedClassify(Integer[] biasedInput) {
         Double summation = 0.0;
 
         for(int i = 0; i < biasedInput.length; i++) {
             summation += biasedInput[i]*weights[i];
         }
 
-        return (summation > 0) ? (byte)1 : (byte)-1;
+        return (byte) Math.signum(summation);
     }
 
-    protected Byte classify(Byte[] input) {
+    protected Byte classify(Integer[] input) {
         input = addBiasToInput(input);
         return biasedClassify(input);
     }
 
-    private Byte[] addBiasToInput(Byte[] input) {
-        Byte[] biasedInput = new Byte[input.length+1];
+    private Integer[] addBiasToInput(Integer[] input) {
+        Integer[] biasedInput = new Integer[input.length+1];
         System.arraycopy(input, 0, biasedInput, 1, input.length);
         biasedInput[0] = 1;
         return biasedInput;

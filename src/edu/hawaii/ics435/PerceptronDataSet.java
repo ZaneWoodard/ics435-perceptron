@@ -1,6 +1,7 @@
 package edu.hawaii.ics435;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class PerceptronDataSet {
@@ -11,17 +12,23 @@ public class PerceptronDataSet {
     public ArrayList<Byte> addedLabels;
 
 
-    public final Point realLineP1;
-    public final Point realLineP2;
-    public Point learnedLineP1;
-    public Point learnedLineP2;
+    public final Point2D.Double realLineP1;
+    public final Point2D.Double realLineP2;
+    public Point2D.Double learnedLineP1;
+    public Point2D.Double learnedLineP2;
 
-    public PerceptronDataSet(Point[] initialPoints, Byte[] initialLabels, Point realLineP1, Point realLineP2) {
+    public final Integer maxX;
+    public final Integer maxY;
+
+    public PerceptronDataSet(Point[] initialPoints, Byte[] initialLabels, Point2D.Double realLineP1, Point2D.Double realLineP2, Integer maxX, Integer maxY) {
         this.initialPoints = initialPoints;
         this.initialLabels = initialLabels;
 
         this.realLineP1 = realLineP1;
         this.realLineP2 = realLineP2;
+
+        this.maxX = maxX;
+        this.maxY = maxY;
     }
 
 }

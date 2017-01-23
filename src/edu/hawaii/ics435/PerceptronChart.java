@@ -3,29 +3,30 @@ package edu.hawaii.ics435;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.FastScatterPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.UnknownKeyException;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.awt.geom.Point2D;
+import java.util.HashMap;
 import java.util.InputMismatchException;
-import java.util.Scanner;
 
-/**
- * Created by zane on 1/22/17.
- */
 public class PerceptronChart extends JFrame {
 
     private final JFreeChart chart;
-    public PerceptronChart(String title, Point[] points, Byte[] labels) {
+    private final HashMap<String, Integer> lineIndexes = new HashMap<>();
+    private Integer maxLineIndex = 0;
+    public PerceptronChart(String title, PerceptronDataSet pds) {
         super(title);
-        XYDataset xy = addInitialPoints(points, labels);
+        XYDataset xy = addInitialPoints(pds.initialPoints, pds.initialLabels);
         this.chart = ChartFactory.createScatterPlot(title, "X", "Y", xy);
+        this.chart.getXYPlot().getDomainAxis().setRange(0.0, pds.maxX);
+        this.chart.getXYPlot().getRangeAxis().setRange(0.0, pds.maxY);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(500,500));
         setContentPane(chartPanel);
@@ -65,13 +66,33 @@ public class PerceptronChart extends JFrame {
         this.chart.getXYPlot().setDataset(result);
     }
 
-    protected void addLine(Point p1, Point p2, String name) {
+    protected void addLine(Point2D.Double p1, Point2D.Double p2, String name) {
+//        Integer index = lineIndexes.get(name);
+//        index = index==null ? ++maxLineIndex : index;
+//        lineIndexes.put(name, index);
+
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false);
-        XYSeriesCollection lineDataSet = new XYSeriesCollection();
-        XYSeries series = new XYSeries(name);
-        series.add(p1.x, p1.y);
-        series.add(p2.x, p2.y);
-        lineDataSet.addSeries(series);
+
+        XYSeriesCollection lineDataSet = (XYSeriesCollection) this.chart.getXYPlot().getDataset(1);
+        if(lineDataSet==null) {
+            lineDataSet = new XYSeriesCollection();
+        }
+
+        XYSeries series;
+        try {
+            series = lineDataSet.getSeries(name);
+            series.clear();
+            series.add(p1.x, p1.y);
+            series.add(p2.x, p2.y);
+        } catch(UnknownKeyException e) {
+            series = new XYSeries(name);
+            series.add(p1.x, p1.y);
+            series.add(p2.x, p2.y);
+            lineDataSet.addSeries(series);
+        }
+
+//        XYSeriesCollection lineDataSet = new XYSeriesCollection();
+//        XYSeries series = new XYSeries(name);
 
         this.chart.getXYPlot().setRenderer(1, lineRenderer);
         this.chart.getXYPlot().setDataset(1, lineDataSet);
