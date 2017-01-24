@@ -20,7 +20,6 @@ public class PerceptronChart extends JFrame {
 
     private final JFreeChart chart;
     private final HashMap<String, Integer> lineIndexes = new HashMap<>();
-    private Integer maxLineIndex = 0;
     public PerceptronChart(String title, PerceptronDataSet pds) {
         super(title);
         XYDataset xy = addInitialPoints(pds.initialPoints, pds.initialLabels);
@@ -117,7 +116,7 @@ public class PerceptronChart extends JFrame {
         this.chart.getXYPlot().setRenderer(1, lineRenderer);
         this.chart.getXYPlot().setDataset(1, lineDataSet);
         try {
-            Thread.sleep(Main.WAIT_MS);
+            Thread.sleep(Main.WAIT_MS/10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

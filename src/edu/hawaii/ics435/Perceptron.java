@@ -17,14 +17,14 @@ public class Perceptron {
     /**
      * The learning rate constant, can be used to scale how much the weights are adjusted by
      */
-    private static double LEARNING_RATE = 1;
+    private static double LEARNING_RATE = 100;
 
     /**
      * Sets the upper limit to how many learning rounds the perceptron algorithm will attempt before quitting
      */
-    private static final int CONVERGENCE_ROUND_LIMIT = 1000;
+    private static final int CONVERGENCE_ROUND_LIMIT = 400;
     private static final Logger logger = Logger.getLogger("Perceptron");
-    private static final Level LOGGING_LEVEL = Level.FINER;
+    private static final Level LOGGING_LEVEL = Level.FINE;
 
     /**
      * This is some magic to get the logger to actually log properly
@@ -44,7 +44,9 @@ public class Perceptron {
 
         //Need +1 for weights & input lengths in order to add a bias field
         this.weights = new Double[inputs[0].length+1];
-        Arrays.fill(weights, 0.0);
+        for(int i = 0; i < this.weights.length; i++) {
+            weights[i] = Math.random();
+        }
         this.inputs = new Integer[inputs.length][inputs[0].length+1];
         for(int i = 0; i < inputs.length; i++) {
             this.inputs[i] = addBiasToInput(inputs[i]);
@@ -55,7 +57,9 @@ public class Perceptron {
         this.inputs = new Integer[points.length][3];
         this.labels = labels;
         this.weights = new Double[3];
-        Arrays.fill(this.weights, 0.0);
+        for(int i = 0; i < this.weights.length; i++) {
+            weights[i] = Math.random();
+        }
         for(int i = 0; i < points.length; i++) {
             Point p = points[i];
             this.inputs[i][0] = 1;
@@ -79,10 +83,10 @@ public class Perceptron {
                     mismatches++;
                     //Misclassification, update the weights
                     Byte difference = (byte) (desiredOutput - output);
-                    Byte delta = (byte) (difference*LEARNING_RATE);
                     logger.finer("Old weights: " + Arrays.toString(weights));
                     for (int i = 0; i < input.length; i++) {
-                        weights[i] = weights[i] + delta * input[i];
+                        Double delta = LEARNING_RATE * input[i] * difference;
+                        weights[i] += delta;
                     }
                     logger.finer("New weights: " + Arrays.toString(weights));
                 }
@@ -93,6 +97,9 @@ public class Perceptron {
                 Point2D.Double decisionBoundaryP2 = new Point2D.Double(-weights[0] / weights[1], 0);
                 Main.addLearnedLine(decisionBoundaryP1, decisionBoundaryP2, round);
             }
+
+
+            LEARNING_RATE /= 1.2;
 
             logger.fine("Round " + round++ + " completed with " + mismatches + " mismatches");
 
